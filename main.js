@@ -12,13 +12,14 @@ import session from 'express-session'
 import MongoStore from 'connect-mongo'
 import handlebars from 'express-handlebars'
 import initPassport from './passport/passportConfig.js'
+import cookieParser from 'cookie-parser'
 
 // http import
 import http from 'http'
 const server = http.createServer(app)
 
 // socket import
-import {Server} from 'socket.io'
+import { Server } from 'socket.io'
 const io = new Server(server)
 
 // mongo
@@ -42,9 +43,12 @@ import userSessionRoute from './routes/userSessionRoute.js'
 initPassport()
 app.use(passport.initialize())
 
+//cookieparser
+app.use(cookieParser())
+
 // data
 app.use(express.json())
-app.use(express.urlencoded({extended: true}))
+app.use(express.urlencoded({ extended: true }))
 
 // dirname
 import path from 'path';

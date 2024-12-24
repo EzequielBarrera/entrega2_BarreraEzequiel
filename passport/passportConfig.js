@@ -19,7 +19,7 @@ const initPassport = () => {
         new LocalStrategy({ passReqToCallback: true, usernameField: 'email' },
             async (req, username, password, done) => {
                 try {
-                    let { email, firstName, password } = req.body
+                    let { email, firstName, lastName, age, password } = req.body
                     // buscamos si existe el user en la DB
                     let userFound = await User.findOne({ email: username })
                     if (userFound) {
@@ -31,14 +31,17 @@ const initPassport = () => {
                     let newUser = {
                         email: email,
                         firstName: firstName,
+                        lastName: lastName,
+                        age: age,
                         password: createHash(password),
                         cart: await newCart.save(),
+
                     }
 
                     // seteamos el rol
-                    // if (userFound.email === 'adminCoder@coder.com' && isValidPassword('admin1234', userFound.password)) {
-                    //     req.session.admin = true;
-                    // }
+                    if (userFound.email === 'adminCoder@coder.com' && isValidPassword('admin1234', userFound.password)) {
+                        req.session.admin = true;
+                    }
                     console.log('User data during register:', newUser)
                     console.log('Password during register:', newUser?.password)
                     // guardamos

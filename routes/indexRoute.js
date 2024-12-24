@@ -5,8 +5,8 @@ const productManager = new ProductController()
 import jwt from 'jsonwebtoken'
 
 router.get('/', async (req, res) => {
-    const { query, limit, page } = req.query
-    const data = await productManager.getProducts(query, limit, page)
+    const { query, limit, page } = req.query;
+    const data = await productManager.getProducts(query, limit, page);
 
     let products = data.docs.map((product) => {
         return {
@@ -19,31 +19,27 @@ router.get('/', async (req, res) => {
             stock: product.stock,
             status: product.status,
             category: product.category,
-        }
-    })
+        };
+    });
 
-    const { docs, ...rest } = data
-    let links = []
+    const { docs, ...rest } = data;
+    let links = [];
 
     for (let i = 1; i < rest.totalPages + 1; i++) {
-        links.push({ label: i, href: 'http://localhost:8080/index/?page=' + i })
+        links.push({ label: i, href: 'http://localhost:8080/index/?page=' + i });
     }
 
-    const authHeader = req.headers.authorization;
-    if (!authHeader) {
-        return res.status(401).send('Authorization header missing')
-    }
-
-    const token = authHeader.split(' ')[1]
+    // Obtener el token desde la cookie
+    const token = req.cookies.cookieToken;
     if (!token) {
-        return res.status(401).send('Token missing in authorization header')
+        return res.status(401).send('Token missing in cookies');
     }
 
     // Verificar el token
     jwt.verify(token, 'tokenSecreto', (err, user) => {
         if (err) {
-            console.error('JWT Error:', err)
-            return res.status(403).send('User not authorized')
+            console.error('JWT Error:', err);
+            return res.status(403).send('User not authorized');
         }
 
         return res.status(200).render('index', {
@@ -51,8 +47,8 @@ router.get('/', async (req, res) => {
             pagination: rest,
             links,
             user: req.session.user,
-        })
-    })
-})
+        });
+    });
+});
 
 export default router

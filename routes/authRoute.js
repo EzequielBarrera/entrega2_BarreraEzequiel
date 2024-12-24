@@ -22,6 +22,8 @@ router.post('/register', passport.authenticate('register', { failureRedirect: '/
         _id: req.user._id,
         email: req.user.email,
         firstName: req.user.firstName,
+        lastName: req.user.lastName,
+        age: req.user.age,
         password: req.user.password,
         cart: req.user.cart
     };
@@ -36,26 +38,32 @@ router.get('/failedregistration', async (req, res) => {
 
 // Login
 router.post('/login', passport.authenticate('login', { failureRedirect: '/auth/failedlogin' }), async (req, res) => {
-    if (!req.user) {
-        return res.status(401).json({ error: 'Invalid credentials' });
+    try {
+        if (!req.user) {
+            return res.json({ error: 'Invalid credentials' });  // Si las credenciales no son válidas, devuelve un error.
+        }
+
+        req.session.user = {
+            _id: req.user._id,
+            email: req.user.email,
+            firstName: req.user.firstName,
+            lastName: req.user.lastName,
+            age: req.user.age,
+            password: req.user.password,
+            cart: req.user.cart
+        };
+
+        let token = jwt.sign(req.session.user, 'tokenSecreto', { expiresIn: '2000s' });
+
+        // Establecer la cookie
+        res.cookie('cookieToken', token, { maxAge: 60 * 60 * 1000 });
+
+        // Redirigir al usuario a la página de productos (index)
+        return res.redirect('/index');  // Redirige aquí y detén el flujo para no enviar más respuestas.
+    } catch (error) {
+        console.error("Error during login:", error);
+        return res.status(500).send({ error: error.message });  // En caso de error, envía un mensaje de error.
     }
-
-    // Guarda el usuario en la sesión
-    req.session.user = {
-        _id: req.user._id,
-        email: req.user.email,
-        firstName: req.user.firstName,
-        password: req.user.password,
-        cart: req.user.cart
-    };
-
-    console.log('User session:', req.session.user);
-
-    // Genera el token
-    const token = jwt.sign(req.session.user, 'tokenSecreto', { expiresIn: '2000s' })
-    console.log({ token, message: 'User logged in' })
-
-    return res.redirect('/index')
 });
 
 // Fallo en el login
