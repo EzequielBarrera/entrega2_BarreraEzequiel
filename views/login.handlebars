@@ -1,16 +1,7 @@
 <div class="container">
     <h1>LOGIN</h1>
-    <a class="btn btn-outline-primary" href="http://localhost:8080/auth/github/">Log in with Github</a>
+    <a class="btn btn-outline-primary" href="http://localhost:8080/auth/github">Log in with Github</a>
     <form action="/auth/login" method="post">
-        <label for="">Username:</label>
-        <input class="form-control" type="text" name="username">
-
-        <label for="">Last Name:</label>
-        <input class="form-control" type="text" name="lastName">
-
-        <label for="">Age:</label>
-        <input class="form-control" type="number" name="age">
-        
         <label for="">Email: </label>
         <input class="form-control" type="email" name="email">
         
@@ -18,6 +9,7 @@
         <input class="form-control" type="password" name="password">
         <br>
         <input class="btn btn-outline-primary" type="submit" value="Log in">
+        <a class="btn btn-outline-success" href="/user/register">Register</a>
     </form>
 
 </div>

@@ -1,0 +1,45 @@
+{{#if user}}
+    <nav class="container-fluid ">
+        <div class="navbar-nav d-flex">
+            <a class="nav-link" href="/home">Productos</a>
+            <a class="nav-link cart" href="/api/carts/{{user.cart}}">Carrito</a>
+            <a class="nav-link" href="/chat">Chat</a>
+            <a class="nav-link" href="/auth/logout">Logout</a>
+        </div>
+    </nav>
+{{/if}}
+<div class="container">
+    <h1 class="text-center">Proyecto Coder</h1>
+    <div class="productsContainer">
+        {{#each products}}
+            <div class="mb-3 w-50">
+                <div class="card">
+                    <h5 class="card-header text-center"> {{this.title}} </h5>
+                    <img class="card-image" src="{{this.thumbnail}}" alt="{{this.title}}">
+                    <div class="card-body text-center"> 
+                        <em class="card-title"> {{this.description}} </em>
+                        <p class="card-text text-center"> <b> ${{this.price}} </b>  </p>
+                        <small class="d-block">id: {{this._id}} </small>
+                        <div class="mb-3 text-center">
+                            <input type="number" id="quantityInput" class="quantityInput form-control-sm" max={{this.stock}} min="1" value="1"/>
+                        </div>
+                        <form action='/api/carts/{{../user.cart}}/products/{{this._id}}' method="POST">
+                            <button type="submit" class="btn btn-success">Agregar al carrito</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {{/each}}   
+    </div>
+        {{#if pagination.hasPrevPage}}
+            <a class="btn btn-outline-info m-2" style='font-size: 20;' href='/home/?page={{pagination.prevPage}}'>⬅{{pagination.prevPage}}</a>
+        {{/if}}
+            <a class="btn btn-outline-info m-2" style='font-size: 20;' href='#'>{{pagination.page}}</a>
+        {{#if pagination.hasNextPage}}
+            <a class="btn btn-outline-info m-2"style='font-size: 20;' href='/home/?page={{pagination.nextPage}}'>{{pagination.nextPage}}➡</a>
+        {{/if}}
+            <br/>
+            <br/>
+</div>
+
+<script src="/cart.js"></script>

@@ -1,18 +1,16 @@
-import dotenv from 'dotenv'
-dotenv.config()
-
 // server
 import express from 'express'
 const app = express()
-const PORT = 8080 || process.env.PORT
 
 // dependencies
 import passport from 'passport'
 import session from 'express-session'
 import MongoStore from 'connect-mongo'
+import config from './config/config.js'
 import handlebars from 'express-handlebars'
 import initPassport from './passport/passportConfig.js'
 import cookieParser from 'cookie-parser'
+import bodyParser from 'body-parser'
 
 // http import
 import http from 'http'
@@ -23,25 +21,22 @@ import { Server } from 'socket.io'
 const io = new Server(server)
 
 // mongo
-import db from './dao/mongoManagers/db.js'
+import db from './dao/db.js'
 import Product from './dao/models/productModel.js'
 import Message from './dao/models/messageModel.js'
-import ProductManager from './dao/mongoManagers/productController.js'
-const PM = new ProductManager()
+import ProductService from './service/productService.js'
+const productService = new ProductService()
+// import CartService from './service/cartsService.js'
+// const cartService = new CartService()
 
 // routes
 import authRoute from './routes/authRoute.js'
 import chatRoute from './routes/chatRoute.js'
 import cartsRoute from './routes/cartsRoute.js'
-import indexRoute from './routes/indexRoute.js'
-import githubAuthRoute from './routes/github.js'
+import homeRoute from './routes/homeRoute.js'
 import productsRoute from './routes/productsRoute.js'
 import realTimeRoute from './routes/realTimeRoute.js'
 import userSessionRoute from './routes/userSessionRoute.js'
-
-// passport
-initPassport()
-app.use(passport.initialize())
 
 //cookieparser
 app.use(cookieParser())
@@ -49,18 +44,22 @@ app.use(cookieParser())
 // data
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+app.use(bodyParser.json())
 
 // dirname
 import path from 'path';
 import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-app.use(express.static(__dirname + '/public'))
+app.use(express.static(path.join(__dirname, '/public')))
 
 // views
+
 app.engine('handlebars', handlebars.engine())
 app.set('view engine', 'handlebars')
 app.set('views', __dirname + '/views')
+
+
 
 // session
 app.use(session({
@@ -72,11 +71,15 @@ app.use(session({
     saveUninitialized: true
 }))
 
+// passport
+initPassport()
+app.use(passport.initialize())
+app.use(passport.session())
+
 // routes
 app.use('/auth', authRoute)
 app.use('/chat', chatRoute) // muestra el chat
-app.use('/auth/github', githubAuthRoute) // autenticación con github
-app.use('/index', indexRoute) // muestra todos los productos
+app.use('/home', homeRoute) // muestra todos los productos
 app.use('/api/carts', cartsRoute) // manejador de carritos
 app.use('/user', userSessionRoute) // session manager 
 app.use('/api/products', productsRoute) // manejador de productos
@@ -88,20 +91,20 @@ io.on('connection', async (socket) => {
 
     // PRODUCTS
     // mostramos todos los productos
-    const products = await PM.getProducts()
+    const products = await productService.getProductsService()
     socket.emit('products', products)
 
     socket.on('newProduct', async (data) => {
         console.log(data)
         const newProduct = new Product(data)
-        PM.addProduct(newProduct)
-        const products = await PM.getProducts()
+        productService.addProductService(newProduct)
+        const products = await productService.getProductsService()
         io.sockets.emit('all-products', products)
     })
 
     socket.on('deleteProduct', async (data) => {
-        await PM.deleteProduct(data)
-        const products = await PM.getProducts()
+        await Product.deleteOne({ _id: data })
+        const products = await productService.getProductsService()
         io.sockets.emit('all-products', products)
     })
 
@@ -114,7 +117,7 @@ io.on('connection', async (socket) => {
     })
 })
 
-server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`)
+server.listen(config.port, () => {
+    console.log(`Server running on port ${config.port}`)
     db.connect()
 })

@@ -3,13 +3,13 @@ import local from 'passport-local'
 import GitHubStrategy from 'passport-github2'
 import User from '../dao/models/userModel.js'
 import { createHash, isValidPassword } from '../utils/bcrypt.js'
-import dotenv from 'dotenv'
 import fetch from 'node-fetch'
 import Cart from '../dao/models/cartModel.js'
+import config from '../config/config.js'
 
-dotenv.config()
-const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID
-const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET
+
+const GITHUB_CLIENT_ID = config.clientID
+const GITHUB_CLIENT_SECRET = config.clientSecret
 
 const LocalStrategy = local.Strategy
 //const GitHubStrategy = github.Strategy
@@ -39,8 +39,10 @@ const initPassport = () => {
                     }
 
                     // seteamos el rol
-                    if (userFound.email === 'adminCoder@coder.com' && isValidPassword('admin1234', userFound.password)) {
-                        req.session.admin = true;
+                    if (newUser.email === 'adminCoder@coder.com' && newUser.password === 'admin1234') {
+                        newUser.role = 'admin'
+                    } else {
+                        newUser.role = 'user'
                     }
                     console.log('User data during register:', newUser)
                     console.log('Password during register:', newUser?.password)
@@ -56,11 +58,11 @@ const initPassport = () => {
     )
 
     passport.use('login',
-        new LocalStrategy({ usernameField: 'email' },
-            async (username, password, done) => {
+        new LocalStrategy({ usernameField: 'email', passwordField: 'password', passReqToCallback: true },
+            async (req, email, password, done) => {
                 try {
                     // buscamos user
-                    const userFound = await User.findOne({ email: username })
+                    const userFound = await User.findOne({ email: email })
                     // si no existe
                     if (!userFound) {
                         console.log('User not found')
@@ -81,7 +83,7 @@ const initPassport = () => {
                     // si sale todo bien
                     return done(null, userFound)
                 } catch (err) {
-                    return done(err)
+                    return err
                 }
             }
         )

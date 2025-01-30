@@ -1,0 +1,29 @@
+{{#if user}}
+    <nav class="container-fluid ">
+        <div class="navbar-nav d-flex">
+            <a class="nav-link" href="/home">Productos</a>
+            <a class="nav-link cart" href="/api/carts/{{user.cart}}">Carrito</a>
+            <a class="nav-link" href="/chat">Chat</a>
+            <a class="nav-link" href="/auth/logout">Logout</a>
+        </div>
+    </nav>
+
+    {{#if cart}}
+        <div class="container">
+            <h1>Cart</h1>
+            <p>Cart id: {{cart._id}}</p>
+            {{#each cart.products}}
+                <div class="card">
+                    <h5 class="card-header text-center"> {{this.product.title}} </h5>
+                        <img class="card-image" src="{{this.product.thumbnail}}" alt="{{this.product.title}}">
+                        <div class="card-body text-center"> 
+                            <em class="card-title"> {{this.product.description}} </em>
+                            <p class="card-text text-center"> <b> ${{this.product.price}} </b>  </p>
+                            <small class="d-block">id: {{this.product._id}} </small>
+                        </div>
+                </div>
+            {{/each}}
+            <a class="purchase btn btn-success" href="/api/carts/{{cart._id}}/purchase" >Comprar</a>
+        </div>
+    {{/if}}
+{{/if}}
