@@ -28,7 +28,6 @@ class CartController {
             const id = req.params.cid
             const user = req.session.user
             const cart = await cartService.getCartByIdService(id)
-            console.log(cart.products)
 
             res.render('cartView', { cart: cart, user: user })
         } catch (error) {
@@ -95,8 +94,17 @@ class CartController {
         try {
             const cid = req.params.cid
             const user = req.session.user.email
+            console.log(user)
 
             const newTicket = await cartService.generatePurchase(user, cid)
+            console.log('newTicket:', newTicket)
+
+            // Verifica si prodStock existe y es un array
+            if (!Array.isArray(newTicket.prodStock)) {
+                console.error("Error: prodStock no es un array", newTicket.prodStock)
+                return res.status(400).send({ error: 'Stock inválido' })
+            }
+
             await cartService.updateProductsService(cid, newTicket.noStock)
             await ticketService.updateStockService(newTicket.prodStock)
 
@@ -105,24 +113,26 @@ class CartController {
                 amount: newTicket.ticket.amount,
                 purchaser: newTicket.ticket.purchaser
             }
+            console.log('newTkt:', newTkt)
 
             const email = {
                 to: user,
-                subjet: 'Purchase',
+                subject: 'Purchase',
                 text: 'Gracias por su compra!',
                 html: `
                 <div class="container">
                     <h1> Resumen de compra </h1>
-                        <div class="row"
+                        <div class="row">
                             <h4> Día: ${newTicket.ticket.purchase_datetime} </h4>
                             <h3> Código: ${newTicket.ticket.code} </h3>
                             <h3> Total: ${newTicket.ticket.amount} </h3>
                         </div>
                 </div>
-                `
+            `
             }
+            console.log(email)
 
-            sendEmail(email)
+            await sendEmail(email)
 
             return res.status(200).send({ message: 'Purchased', newTkt })
         } catch (error) {

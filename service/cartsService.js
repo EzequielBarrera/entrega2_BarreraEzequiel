@@ -27,10 +27,14 @@ class CartService {
 
     getCartByIdService = async (id) => {
         try {
-            const cartFound = await cartMethods.getCartByIdMethods(id)
-            return cartFound
+            const cart = await Cart.findById(id).populate('products.product').lean()
+            if (!cart) {
+                throw new Error("Cart not found")
+            }
+            return cart
         } catch (error) {
-            throw new Error(error.message)
+            console.error("Error en getCartByIdService:", error.message)
+            throw error
         }
     }
 
@@ -151,30 +155,40 @@ class CartService {
         try {
             const cart = await cartMethods.getCartByIdMethods(cartId)
             if (cart) {
-                const prodsIds = cart.products.map(product => product._id.toString())
+                const prodsIds = cart.products.map(product => product.product._id.toString())
                 const prodsQuantity = cart.products.map(q => q.quantity)
                 const prodsInfo = await productService.getProductsDataService(prodsIds)
-
+                console.log(prodsIds, prodsQuantity, prodsInfo)
                 let amount = 0
                 let noStock = []
                 let prodStock = []
+                console.log(prodStock)
 
                 prodsInfo.map((product, i) => {
                     if (prodsQuantity[i] > product.stock) {
                         noStock.push({ prodId: product._id, quantity: prodsQuantity[i] })
                     } else {
                         let newStock = product.stock - (prodsQuantity[i])
+                        console.log('newStock:', newStock)
 
                         let prodPrice = product.price * (prodsQuantity[i])
+                        console.log('Precio del producto:', product.price)
+                        console.log('Cantidad del producto:', prodsQuantity[i])
                         amount += prodPrice
 
                         prodStock.push({ prodId: product._id, stock: newStock })
+                        console.log('prodStock:', prodStock)
                     }
                 })
                 const ticket = await ticketService.createTicketService({
                     amount, purchaser: user
                 })
-                return (ticket, prodStock, noStock)
+                console.log(ticket)
+                return {
+                    ticket: ticket,
+                    prodStock: prodStock,
+                    noStock: noStock
+                }
             } else {
                 console.log('Cart not found')
             }

@@ -6,7 +6,7 @@ const productsService = new ProductsService()
 class TicketService {
     createTicketService = async (newTicket) => {
         try {
-            const newTkt = await TicketMethods.createTicketMethod(newTicket)
+            const newTkt = await ticketMethods.createTicketMethod(newTicket)
             return newTkt
         } catch (error) {
             console.log(error)
@@ -15,7 +15,7 @@ class TicketService {
 
     getTicketsService = async () => {
         try {
-            const tickets = await TicketMethods.getTicketsMethod()
+            const tickets = await ticketMethods.getTicketsMethod()
             return tickets
         } catch (error) {
             console.log(error)
@@ -35,7 +35,7 @@ class TicketService {
 
     deletePurchaseService = async () => {
         try {
-            const ticket = await TicketMethods.deletePurchaseMethod()
+            const ticket = await ticketMethods.deletePurchaseMethod()
             return ticket
         } catch (error) {
             console.log(error)

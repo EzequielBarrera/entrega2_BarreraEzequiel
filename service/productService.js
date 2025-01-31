@@ -15,6 +15,7 @@ class ProductService {
     getProductByIdService = async (id) => {
         try {
             const productFound = await productMethods.getProductByIdMethods(id)
+            console.log(productFound)
             return productFound
         } catch (err) {
             console.log(err)
@@ -38,7 +39,7 @@ class ProductService {
 
             const product = await productMethods.addProductMethods(newProduct)
             if (product) console.log({ message: 'Product added successfully', product: product })
-
+            console.log(product)
             return product
         } catch (err) {
             console.log(err)
@@ -91,12 +92,13 @@ class ProductService {
 
     getProductsDataService = async (arr) => {
         const productsData = []
-
+        console.log(arr)
         for (const id of arr) {
             const productFound = await this.getProductByIdService(id)
+            console.log(productFound)
             productsData.push(productFound)
         }
-
+        console.log(productsData)
         return productsData
     }
 

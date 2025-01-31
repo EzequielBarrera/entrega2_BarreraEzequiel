@@ -30,11 +30,12 @@ class ProductsMethods {
 
     getProductByIdMethods = async (id) => {
         const productFound = await Product.findOne({ _id: id })
+        console.log(productFound)
         return productFound
     }
 
     updateProductMethods = async (id, newData) => {
-        const updatedProduct = await Product.updateOne({ _id: id }, ...newData)
+        const updatedProduct = await Product.updateOne({ _id: id }, newData)
         return updatedProduct
     }
 

@@ -23,7 +23,12 @@
                         </div>
                 </div>
             {{/each}}
-            <a class="purchase btn btn-success" href="/api/carts/{{cart._id}}/purchase" >Comprar</a>
+            {{#if cart.products.length}}
+        <a class="purchase btn btn-success" href="/api/carts/{{cart._id}}/purchase">Comprar</a>
+        {{else}}
+        <p>El carrito está vacío.</p>
+        <a class="purchase btn btn-success" href="/home">Ver Tienda</a>
+        {{/if}} 
         </div>
     {{/if}}
 {{/if}}
